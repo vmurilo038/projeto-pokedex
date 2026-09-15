@@ -4,55 +4,133 @@ let TODOSOSPOKEMONS = [];
 
 const container = document.querySelector("#pokemon-container");
 
+
 async function buscarPokemons() {
+
     try {
+
+        container.innerHTML = "Carregando Pokémon...";
+
+
         const resposta = await fetch(URL);
-        const dados = await resposta.json();
-        const pokemons = dados.results;
-        return pokemons;
-    } catch (error) {
-        console.error("Error na pesquisa dos pokemons:", error);
+
+
+        if (!resposta.ok) {
+
+            throw new Error("Erro ao buscar os Pokémon");
+
+        }
+
+
+     
+        const POKEMONS = await resposta.json();
+
+
+        console.log(POKEMONS);
+
+
+        for (const pokemon of POKEMONS.results) {
+
+
+           
+            console.log(pokemon.url);
+
+
+           
+            const respostaPokemon =
+                await fetch(pokemon.url);
+
+
+            const POKEMONTESTE =
+                await respostaPokemon.json();
+
+
+            console.log(POKEMONTESTE);
+
+
+            const POKEMONITEM = {
+
+                name: POKEMONTESTE.name,
+
+                img: POKEMONTESTE.sprites.front_default
+
+            };
+
+
+            TODOSOSPOKEMONS.push(POKEMONITEM);
+
+        }
+
+
+        console.log(TODOSOSPOKEMONS);
+
+
+        criarCards();
+
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        container.innerHTML =
+            "Erro ao carregar Pokémon.";
+
     }
+
 }
 
-async function buscarDetalhesPokemon(url) {
-    try {
-        const resposta = await fetch(url);
-        const dados = await resposta.json();
-        return dados;
-    } catch (error) {
-        console.error("Error na pesquisa dos detalhes do pokemon:", error);
-    }}
 
-   function criarCard(pokemon) {
+function criarCards() {
 
-    const card = document.createElement("div");
+    container.innerHTML = "";
 
-    card.classList.add("pokemon-card");
 
-    card.innerHTML = `
-        <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
-        
-        <h2>${pokemon.name}</h2>
-        
-        <p>Tipo: ${pokemon.types[0].type.name}</p>
-    `;
+    TODOSOSPOKEMONS.forEach((pokemon, index) => {
 
-    container.appendChild(card);
+
+        const card = document.createElement("div");
+
+
+        card.classList.add("pokemon-card");
+
+
+        card.innerHTML = `
+
+            <div class="pokemon-card-info">
+
+                <div class="pokemon-number">
+                    #${String(index + 1).padStart(3, "0")}
+                </div>
+
+                <h2>
+                    ${pokemon.name}
+                </h2>
+
+                <p>
+                    A strange seed was planted
+                    on its back at birth.
+                </p>
+
+                <button class="know-more">
+                    Know More
+                </button>
+
+            </div>
+
+
+            <img
+                src="${pokemon.img}"
+                alt="${pokemon.name}"
+            >
+
+        `;
+
+
+        container.appendChild(card);
+
+    });
+
 }
 
-async function carregarPokemons() {
 
-    const pokemons = await buscarPokemons();
-
-    for (const pokemon of pokemons) {
-
-        const detalhes = await buscarDetalhesPokemon(pokemon.url);
-
-        criarCard(detalhes);
-    }
-}
-
-carregarPokemons();
-
-buscarPokemons()
+buscarPokemons();
